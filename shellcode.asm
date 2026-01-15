@@ -1,3 +1,0 @@
-BITS 64
-mov rdi, 0x72
-jmp 0x401216
